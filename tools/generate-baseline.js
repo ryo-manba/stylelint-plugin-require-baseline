@@ -162,7 +162,7 @@ function extractCSSFeatures(features) {
       if (!(`${type}()` in mdnData.css.functions)) {
         continue;
       }
-      
+
       types[type] = mapFeatureStatus(status);
       continue;
     }

@@ -77,7 +77,7 @@ testRule({
     },
     {
       code: "pre { overflow: auto; }",
-      description: "See https://github.com/eslint/css/issues/79"
+      description: "See https://github.com/eslint/css/issues/79",
     },
     {
       code: "dialog[open] { color: red; }",
@@ -410,4 +410,104 @@ testRule({
   config: [true, { available: 2024 }],
 
   accept: [{ code: ".box { backdrop-filter: blur(10px); }" }],
+});
+
+testRule({
+  plugins: [plugin],
+  ruleName,
+  config: [
+    true,
+    {
+      ignoreSelectors: ["has", "details-content"],
+    },
+  ],
+
+  accept: [
+    {
+      code: "h1:has(+ h2) { margin: 0 0 0.25rem 0; }",
+    },
+    {
+      code: "details::details-content { background-color: #a29bfe; }",
+    },
+  ],
+
+  reject: [
+    {
+      code: stripIndent`label {
+        & input {
+          border: blue 2px dashed;
+        }
+      }`,
+      message: messages.notBaselineSelector("nesting", "widely"),
+      line: 2,
+      column: 9,
+      endLine: 2,
+      endColumn: 10,
+    },
+  ],
+});
+
+testRule({
+  plugins: [plugin],
+  ruleName,
+  config: [
+    true,
+    {
+      ignoreProperties: ["accent-color", "backdrop-filter"],
+    },
+  ],
+
+  accept: [
+    {
+      code: "a { accent-color: bar; backdrop-filter: auto }",
+    },
+  ],
+
+  reject: [
+    {
+      code: "a { clip-path: stroke-box; }",
+      message: messages.notBaselinePropertyValue(
+        "clip-path",
+        "stroke-box",
+        "widely",
+      ),
+      line: 1,
+      column: 16,
+      endLine: 1,
+      endColumn: 26,
+    },
+  ],
+});
+
+testRule({
+  plugins: [plugin],
+  ruleName,
+  config: [
+    true,
+    {
+      ignoreAtRules: ["container"],
+    },
+  ],
+
+  accept: [
+    {
+      code: "@container (min-width: 800px) { a { color: red; } }",
+    },
+  ],
+
+  reject: [
+    {
+      code: stripIndent`
+        @property --foo {
+          syntax: "*";
+          inherits: false;
+        }
+      `,
+      message: messages.notBaselineAtRule("@property", "widely"),
+      line: 1,
+      column: 1,
+      endLine: 1,
+      endColumn: 10,
+    },
+  ],
 });

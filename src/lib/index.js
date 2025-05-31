@@ -410,6 +410,9 @@ const ruleFunction = (primary, secondaryOptions) => {
     const baselineAvailability = new BaselineAvailability(
       secondaryOptions?.available,
     );
+    const ignoreSelectors = new Set(secondaryOptions?.ignoreSelectors || []);
+    const ignoreProperties = new Set(secondaryOptions?.ignoreProperties || []);
+    const ignoreAtRules = new Set(secondaryOptions?.ignoreAtRules || []);
 
     const supportsRules = new SupportsRules();
 
@@ -592,6 +595,8 @@ const ruleFunction = (primary, secondaryOptions) => {
         return;
       }
 
+      if (ignoreAtRules.has(name)) return;
+
       if (!atRules.has(name)) return;
 
       const featureStatus = atRules.get(name);
@@ -642,6 +647,8 @@ const ruleFunction = (primary, secondaryOptions) => {
      */
     function checkProperty(decl, property) {
       if (supportsRules.hasProperty(property)) return;
+
+      if (ignoreProperties.has(property)) return;
 
       // If the property is not in the Baseline data, skip
       if (!properties.has(property)) return;
@@ -796,6 +803,8 @@ const ruleFunction = (primary, secondaryOptions) => {
 
           if (supportsRules.hasSelector(selectorName)) return;
 
+          if (ignoreSelectors.has(selectorName)) return;
+
           if (!selectors.has(selectorName)) return;
 
           const featureStatus = selectors.get(selectorName);
@@ -812,7 +821,7 @@ const ruleFunction = (primary, secondaryOptions) => {
 
             const index = node.loc.start.offset;
             let endIndex = index;
-            
+
             if (selectorName !== "nesting") {
               endIndex += selectorName.length + prefixSymbolLength;
             }
